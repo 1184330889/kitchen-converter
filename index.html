@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Converter - Easy Cooking Unit Conversion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #ff6b6b;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .theme-switcher {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(180deg);
+        }
+        
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .lang-btn {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        
+        .lang-btn.active {
+            background: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .converter-section {
+            padding: 30px;
+        }
+        
+        .conversion-type {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .conversion-type:hover {
+            border-color: #ff6b6b;
+            transform: translateY(-2px);
+        }
+        
+        .conversion-type h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            min-width: 100px;
+        }
+        
+        .unit-select {
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            min-width: 120px;
+        }
+        
+        .convert-btn {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .convert-btn:hover {
+            background: #ff5252;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2e7d32;
+            display: none;
+            position: relative;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .result-text {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f1f3f4;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .ingredient-converter {
+            display: none;
+        }
+        
+        .ingredient-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .ingredient-item {
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .ingredient-item:hover {
+            background: #ffe0b2;
+            transform: scale(1.05);
+        }
+
+        .ingredient-item.hidden {
+            display: none;
+        }
+        
+        .portion-example {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* 搜索框样式 */
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            background: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            border-color: #ff6b6b;
+        }
+
+        /* 分类选择样式 */
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            background: #f1f3f4;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .category-btn.active {
+            background: #ff6b6b;
+            color: white;
+            font-weight: bold;
+        }
+
+        .category-btn:hover {
+            background: #ff9999;
+            color: white;
+        }
+
+        /* 历史记录样式 */
+        .history-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .clear-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 10px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+        }
+
+        .history-item .conversion-text {
+            flex: 1;
+        }
+
+        .history-item .timestamp {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* 复制按钮样式 */
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: #17a2b8;
+            animation: copySuccess 0.3s ease;
+        }
+
+        @keyframes copySuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* 复制成功提示 */
+        .copy-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+        }
+
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* 历史记录项的复制按钮 */
+        .history-item .copy-btn {
+            padding: 4px 8px;
+            font-size: 0.7em;
+            margin-left: 8px;
+        }
+
+        /* 夜间模式样式 */
+        body.dark-theme {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        .dark-theme .container {
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .header {
+            background: #e74c3c;
+        }
+
+        .dark-theme .conversion-type {
+            background: #34495e;
+            border-color: transparent;
+        }
+
+        .dark-theme .conversion-type:hover {
+            border-color: #e74c3c;
+        }
+
+        .dark-theme .conversion-type h3 {
+            color: #ecf0f1;
+        }
+
+        .dark-theme .input-field,
+        .dark-theme .unit-select {
+            background: #34495e;
+            border-color: #5a6c7d;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .input-field:focus,
+        .dark-theme .unit-select:focus {
+            border-color: #e74c3c;
+        }
+
+        .dark-theme .convert-btn {
+            background: #e74c3c;
+        }
+
+        .dark-theme .convert-btn:hover {
+            background: #c0392b;
+        }
+
+        .dark-theme .result {
+            background: #27ae60;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .tabs {
+            background: #34495e;
+        }
+
+        .dark-theme .tab {
+            color: #bdc3c7;
+        }
+
+        .dark-theme .tab.active {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dark-theme .ingredient-item {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .ingredient-item:hover {
+            background: #3d566e;
+        }
+
+        .dark-theme .search-box {
+            background: #34495e;
+            border-color: #5a6c7d;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .search-box:focus {
+            border-color: #e74c3c;
+        }
+
+        .dark-theme .search-box::placeholder {
+            color: #95a5a6;
+        }
+
+        .dark-theme .category-btn {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .category-btn.active {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dark-theme .category-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dark-theme .history-section {
+            background: #34495e;
+            border-left-color: #e74c3c;
+        }
+
+        .dark-theme .history-title {
+            color: #ecf0f1;
+        }
+
+        .dark-theme .history-item {
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .history-item:hover {
+            background: #3d566e;
+        }
+
+        .dark-theme .history-item .timestamp {
+            color: #95a5a6;
+        }
+
+        .dark-theme .no-history {
+            color: #95a5a6;
+        }
+
+        .dark-theme .clear-history-btn {
+            background: #c0392b;
+        }
+
+        .dark-theme .clear-history-btn:hover {
+            background: #a93226;
+        }
+
+        .dark-theme .copy-btn {
+            background: #28a745;
+        }
+
+        .dark-theme .copy-btn:hover {
+            background: #1e7e34;
+        }
+
+        .dark-theme .copy-btn.copied {
+            background: #17a2b8;
+        }
+
+        .dark-theme .copy-toast {
+            background: #1e7e34;
+        }
+
+        .dark-theme .unit-select option {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .input-field, .unit-select {
+                width: 100%;
+            }
+            
+            .theme-switcher {
+                position: static;
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+            
+            .language-switcher {
+                position: static;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+
+            .category-tabs {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .category-btn {
+                white-space: nowrap;
+                min-width: fit-content;
+            }
+
+            .result {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .result-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .copy-toast {
+                right: 10px;
+                left: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="theme-switcher">
+                <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Dark Mode">
+                    🌙
+                </button>
+            </div>
+            
+            <div class="language-switcher">
+                <button class="lang-btn active" onclick="switchLanguage('en', this)">English</button>
+                <button class="lang-btn" onclick="switchLanguage('zh', this)">中文</button>
+            </div>
+            <h1 data-lang-en="🍳 Kitchen Converter" data-lang-zh="🍳 厨房转换器">🍳 Kitchen Converter</h1>
+            <p data-lang-en="Quick & Easy Cooking Unit Conversion" data-lang-zh="快速便捷的烹饪单位转换工具">Quick & Easy Cooking Unit Conversion</p>
+        </div>
+        
+        <div class="converter-section">
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('basic', this)" data-lang-en="Basic Units" data-lang-zh="基础单位">Basic Units</div>
+                <div class="tab" onclick="showTab('ingredients', this)" data-lang-en="Smart Ingredients" data-lang-zh="智能食材">Smart Ingredients</div>
+                <div class="tab" onclick="showTab('portions', this)" data-lang-en="Portion Scaler" data-lang-zh="份量调整">Portion Scaler</div>
+            </div>
+            
+            <!-- Basic Conversion -->
+            <div id="basic-converter" class="tab-content">
+                <!-- Weight Conversion -->
+                <div class="conversion-type">
+                    <h3 data-lang-en="⚖️ Weight Conversion" data-lang-zh="⚖️ 重量转换">⚖️ Weight Conversion</h3>
+                    <div class="input-group">
+                        <input type="number" class="input-field" id="weightInput" data-placeholder-en="Enter weight" data-placeholder-zh="输入重量" placeholder="Enter weight">
+                        <select class="unit-select" id="weightFrom">
+                            <option value="g" data-lang-en="Grams (g)" data-lang-zh="克 (g)">Grams (g)</option>
+                            <option value="kg" data-lang-en="Kilograms (kg)" data-lang-zh="千克 (kg)">Kilograms (kg)</option>
+                            <option value="oz" data-lang-en="Ounces (oz)" data-lang-zh="盎司 (oz)">Ounces (oz)</option>
+                            <option value="lb" data-lang-en="Pounds (lb)" data-lang-zh="磅 (lb)">Pounds (lb)</option>
+                        </select>
+                        <span>→</span>
+                        <select class="unit-select" id="weightTo">
+                            <option value="oz" data-lang-en="Ounces (oz)" data-lang-zh="盎司 (oz)">Ounces (oz)</option>
+                            <option value="g" data-lang-en="Grams (g)" data-lang-zh="克 (g)">Grams (g)</option>
+                            <option value="kg" data-lang-en="Kilograms (kg)" data-lang-zh="千克 (kg)">Kilograms (kg)</option>
+                            <option value="lb" data-lang-en="Pounds (lb)" data-lang-zh="磅 (lb)">Pounds (lb)</option>
+                        </select>
+                        <button class="convert-btn" onclick="convertWeight()" data-lang-en="Convert" data-lang-zh="转换">Convert</button>
+                    </div>
+                    <div class="result" id="weightResult" style="display: none;">
+                        <div class="result-text" id="weightResultText"></div>
+                        <div class="result-actions">
+                            <button class="copy-btn" onclick="copyResult('weight')" 
+                                    data-lang-en="📋 Copy" data-lang-zh="📋 复制">📋 Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-section" id="weightHistory" style="display: none;">
+                        <div class="history-header">
+                            <span class="history-title" data-lang-en="Recent Conversions" data-lang-zh="最近转换">Recent Conversions</span>
+                            <button class="clear-history-btn" onclick="clearHistory('weight')" 
+                                    data-lang-en="Clear" data-lang-zh="清除">Clear</button>
+                        </div>
+                        <div class="history-list" id="weightHistoryList">
+                            <div class="no-history" data-lang-en="No recent conversions" data-lang-zh="暂无转换记录">No recent conversions</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Volume Conversion -->
+                <div class="conversion-type">
+                    <h3 data-lang-en="🥤 Volume Conversion" data-lang-zh="🥤 体积转换">🥤 Volume Conversion</h3>
+                    <div class="input-group">
+                        <input type="number" class="input-field" id="volumeInput" data-placeholder-en="Enter volume" data-placeholder-zh="输入体积" placeholder="Enter volume">
+                        <select class="unit-select" id="volumeFrom">
+                            <option value="ml" data-lang-en="Milliliters (ml)" data-lang-zh="毫升 (ml)">Milliliters (ml)</option>
+                            <option value="l" data-lang-en="Liters (l)" data-lang-zh="升 (l)">Liters (l)</option>
+                            <option value="cup" data-lang-en="Cups" data-lang-zh="杯">Cups</option>
+                            <option value="tbsp" data-lang-en="Tablespoons" data-lang-zh="汤匙">Tablespoons</option>
+                            <option value="tsp" data-lang-en="Teaspoons" data-lang-zh="茶匙">Teaspoons</option>
+                            <option value="fl-oz" data-lang-en="Fluid Ounces" data-lang-zh="液体盎司">Fluid Ounces</option>
+                        </select>
+                        <span>→</span>
+                        <select class="unit-select" id="volumeTo">
+                            <option value="cup" data-lang-en="Cups" data-lang-zh="杯">Cups</option>
+                            <option value="ml" data-lang-en="Milliliters (ml)" data-lang-zh="毫升 (ml)">Milliliters (ml)</option>
+                            <option value="l" data-lang-en="Liters (l)" data-lang-zh="升 (l)">Liters (l)</option>
+                            <option value="tbsp" data-lang-en="Tablespoons" data-lang-zh="汤匙">Tablespoons</option>
+                            <option value="tsp" data-lang-en="Teaspoons" data-lang-zh="茶匙">Teaspoons</option>
+                            <option value="fl-oz" data-lang-en="Fluid Ounces" data-lang-zh="液体盎司">Fluid Ounces</option>
+                        </select>
+                        <button class="convert-btn" onclick="convertVolume()" data-lang-en="Convert" data-lang-zh="转换">Convert</button>
+                    </div>
+                    <div class="result" id="volumeResult" style="display: none;">
+                        <div class="result-text" id="volumeResultText"></div>
+                        <div class="result-actions">
+                            <button class="copy-btn" onclick="copyResult('volume')" 
+                                    data-lang-en="📋 Copy" data-lang-zh="📋 复制">📋 Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-section" id="volumeHistory" style="display: none;">
+                        <div class="history-header">
+                            <span class="history-title" data-lang-en="Recent Conversions" data-lang-zh="最近转换">Recent Conversions</span>
+                            <button class="clear-history-btn" onclick="clearHistory('volume')" 
+                                    data-lang-en="Clear" data-lang-zh="清除">Clear</button>
+                        </div>
+                        <div class="history-list" id="volumeHistoryList">
+                            <div class="no-history" data-lang-en="No recent conversions" data-lang-zh="暂无转换记录">No recent conversions</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Temperature Conversion -->
+                <div class="conversion-type">
+                    <h3 data-lang-en="🌡️ Temperature Conversion" data-lang-zh="🌡️ 温度转换">🌡️ Temperature Conversion</h3>
+                    <div class="input-group">
+                        <input type="number" class="input-field" id="tempInput" data-placeholder-en="Enter temperature" data-placeholder-zh="输入温度" placeholder="Enter temperature">
+                        <select class="unit-select" id="tempFrom">
+                            <option value="c" data-lang-en="Celsius (°C)" data-lang-zh="摄氏度 (°C)">Celsius (°C)</option>
+                            <option value="f" data-lang-en="Fahrenheit (°F)" data-lang-zh="华氏度 (°F)">Fahrenheit (°F)</option>
+                        </select>
+                        <span>→</span>
+                        <select class="unit-select" id="tempTo">
+                            <option value="f" data-lang-en="Fahrenheit (°F)" data-lang-zh="华氏度 (°F)">Fahrenheit (°F)</option>
+                            <option value="c" data-lang-en="Celsius (°C)" data-lang-zh="摄氏度 (°C)">Celsius (°C)</option>
+                        </select>
+                        <button class="convert-btn" onclick="convertTemperature()" data-lang-en="Convert" data-lang-zh="转换">Convert</button>
+                    </div>
+                    <div class="result" id="tempResult" style="display: none;">
+                        <div class="result-text" id="tempResultText"></div>
+                        <div class="result-actions">
+                            <button class="copy-btn" onclick="copyResult('temp')" 
+                                    data-lang-en="📋 Copy" data-lang-zh="📋 复制">📋 Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-section" id="tempHistory" style="display: none;">
+                        <div class="history-header">
+                            <span class="history-title" data-lang-en="Recent Conversions" data-lang-zh="最近转换">Recent Conversions</span>
+                            <button class="clear-history-btn" onclick="clearHistory('temp')" 
+                                    data-lang-en="Clear" data-lang-zh="清除">Clear</button>
+                        </div>
+                        <div class="history-list" id="tempHistoryList">
+                            <div class="no-history" data-lang-en="No recent conversions" data-lang-zh="暂无转换记录">No recent conversions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Smart Ingredients Converter -->
+            <div id="ingredients-converter" class="tab-content ingredient-converter">
+                <h3 data-lang-en="🥄 Smart Ingredient Converter" data-lang-zh="🥄 智能食材转换器">🥄 Smart Ingredient Converter</h3>
+                
+                <div class="search-section">
+                    <input type="text" class="search-box" id="ingredientSearch" 
+                           data-placeholder-en="Search ingredients..." 
+                           data-placeholder-zh="搜索食材..." 
+                           placeholder="Search ingredients..."
+                           oninput="filterIngredients()">
+                </div>
+                
+                <div class="category-tabs">
+                    <button class="category-btn active" onclick="filterByCategory('all', this)" 
+                            data-lang-en="All" data-lang-zh="全部">All</button>
+                    <button class="category-btn" onclick="filterByCategory('baking', this)" 
+                            data-lang-en="Baking" data-lang-zh="烘焙">Baking</button>
+                    <button class="category-btn" onclick="filterByCategory('liquid', this)" 
+                            data-lang-en="Liquids" data-lang-zh="液体">Liquids</button>
+                    <button class="category-btn" onclick="filterByCategory('protein', this)" 
+                            data-lang-en="Protein" data-lang-zh="蛋白质">Protein</button>
+                    <button class="category-btn" onclick="filterByCategory('spice', this)" 
+                            data-lang-en="Others" data-lang-zh="其他">Others</button>
+                </div>
+                
+                <p style="margin-bottom: 20px; color: #666;" 
+                   data-lang-en="Click on an ingredient to see common conversions:" 
+                   data-lang-zh="点击食材查看常用转换：">Click on an ingredient to see common conversions:</p>
+                   <div class="ingredient-list" id="ingredientList"></div>
+                
+                   <div class="result" id="ingredientResult" style="display: none; margin-top: 20px;"></div>
+               </div>
+               
+               <!-- Portion Scaler -->
+               <div id="portions-converter" class="tab-content ingredient-converter">
+                   <h3 data-lang-en="👥 Recipe Portion Scaler" data-lang-zh="👥 食谱份量调整器">👥 Recipe Portion Scaler</h3>
+                   <div class="conversion-type">
+                       <div class="input-group">
+                           <label data-lang-en="Original serves:" data-lang-zh="原始份量：">Original serves:</label>
+                           <input type="number" class="input-field" id="originalPortions" value="4" style="max-width: 100px;">
+                           <label data-lang-en="Want to serve:" data-lang-zh="目标份量：">Want to serve:</label>
+                           <input type="number" class="input-field" id="newPortions" value="6" style="max-width: 100px;">
+                           <button class="convert-btn" onclick="calculatePortions()" data-lang-en="Calculate" data-lang-zh="计算">Calculate</button>
+                       </div>
+                       <div class="result" id="portionResult"></div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   
+       <!-- 复制成功提示 -->
+       <div id="copyToast" class="copy-toast">
+           <span data-lang-en="Copied to clipboard!" data-lang-zh="已复制到剪贴板！">Copied to clipboard!</span>
+       </div>
+   
+       <script>
+           let currentLanguage = 'en';
+           let isDarkTheme = false;
+           
+           // Language translations
+           const translations = {
+               en: {
+                   title: "Kitchen Converter - Easy Cooking Unit Conversion",
+                   alertInvalidNumber: "Please enter a valid number",
+                   alertInvalidPortions: "Please enter valid portion numbers",
+                   recipeFactor: "Recipe Scaling Factor:",
+                   multiplyIngredients: "Multiply all ingredients by",
+                   examples: "Examples:",
+                   commonConversions: "Common Conversions:",
+                   switchToDark: "Switch to Dark Mode",
+                   switchToLight: "Switch to Light Mode"
+               },
+               zh: {
+                   title: "厨房转换器 - 快速烹饪单位转换工具",
+                   alertInvalidNumber: "请输入有效数字",
+                   alertInvalidPortions: "请输入有效的份量数字",
+                   recipeFactor: "食谱缩放系数：",
+                   multiplyIngredients: "所有食材乘以",
+                   examples: "示例：",
+                   commonConversions: "常用转换：",
+                   switchToDark: "切换到夜间模式",
+                   switchToLight: "切换到日间模式"
+               }
+           };
+   
+           // Unit conversion data
+           const conversions = {
+               weight: {
+                   g: 1,
+                   kg: 1000,
+                   oz: 28.3495,
+                   lb: 453.592
+               },
+               volume: {
+                   ml: 1,
+                   l: 1000,
+                   cup: 240,
+                   tbsp: 15,
+                   tsp: 5,
+                   'fl-oz': 29.5735
+               }
+           };
+   
+           // 扩展的食材数据库
+           const ingredients = {
+               // 烘焙类
+               flour: {
+                   name: { en: "All-Purpose Flour", zh: "中筋面粉" },
+                   category: "baking",
+                   conversions: {
+                       en: ["1 cup = 140g", "1 tablespoon = 9g", "1 teaspoon = 3g", "1 pound = 454g = 3¼ cups"],
+                       zh: ["1杯 = 140克", "1汤匙 = 9克", "1茶匙 = 3克", "1磅 = 454克 = 3¼杯"]
+                   }
+               },
+               sugar: {
+                   name: { en: "Granulated Sugar", zh: "细砂糖" },
+                   category: "baking",
+                   conversions: {
+                       en: ["1 cup = 200g", "1 tablespoon = 12g", "1 teaspoon = 4g", "1 pound = 454g = 2¼ cups"],
+                       zh: ["1杯 = 200克", "1汤匙 = 12克", "1茶匙 = 4克", "1磅 = 454克 = 2¼杯"]
+                   }
+               },
+               brownSugar: {
+                   name: { en: "Brown Sugar", zh: "红糖" },
+                   category: "baking",
+                   conversions: {
+                       en: ["1 cup packed = 220g", "1 tablespoon = 14g", "1 teaspoon = 5g", "1 pound = 454g = 2 cups packed"],
+                       zh: ["1杯压实 = 220克", "1汤匙 = 14克", "1茶匙 = 5克", "1磅 = 454克 = 2杯压实"]
+                   }
+               },
+               bakingPowder: {
+                   name: { en: "Baking Powder", zh: "泡打粉" },
+                   category: "baking",
+                   conversions: {
+                       en: ["1 teaspoon = 4g", "1 tablespoon = 12g", "1 cup = 192g", "1 packet = 7g = 1¾ teaspoons"],
+                       zh: ["1茶匙 = 4克", "1汤匙 = 12克", "1杯 = 192克", "1包 = 7克 = 1¾茶匙"]
+                   }
+               },
+               
+               // 液体类
+               milk: {
+                   name: { en: "Milk", zh: "牛奶" },
+                   category: "liquid",
+                   conversions: {
+                       en: ["1 cup = 240ml", "1 tablespoon = 15ml", "1 teaspoon = 5ml", "1 liter = 1000ml = 4¼ cups"],
+                       zh: ["1杯 = 240毫升", "1汤匙 = 15毫升", "1茶匙 = 5毫升", "1升 = 1000毫升 = 4¼杯"]
+                   }
+               },
+               oil: {
+                   name: { en: "Vegetable Oil", zh: "植物油" },
+                   category: "liquid",
+                   conversions: {
+                       en: ["1 cup = 240ml = 200g", "1 tablespoon = 15ml = 12g", "1 teaspoon = 5ml = 4g", "1 liter = 4⅓ cups"],
+                       zh: ["1杯 = 240毫升 = 200克", "1汤匙 = 15毫升 = 12克", "1茶匙 = 5毫升 = 4克", "1升 = 4⅓杯"]
+                   }
+               },
+               cream: {
+                   name: { en: "Heavy Cream", zh: "淡奶油" },
+                   category: "liquid",
+                   conversions: {
+                       en: ["1 cup = 240ml = 230g", "1 tablespoon = 15ml = 14g", "1 teaspoon = 5ml = 5g", "1 pint = 480ml = 2 cups"],
+                       zh: ["1杯 = 240毫升 = 230克", "1汤匙 = 15毫升 = 14克", "1茶匙 = 5毫升 = 5克", "1品脱 = 480毫升 = 2杯"]
+                   }
+               },
+               honey: {
+                   name: { en: "Honey", zh: "蜂蜜" },
+                   category: "liquid",
+                   conversions: {
+                       en: ["1 cup = 340g", "1 tablespoon = 21g", "1 teaspoon = 7g", "1 pound = 454g = 1⅓ cups"],
+                       zh: ["1杯 = 340克", "1汤匙 = 21克", "1茶匙 = 7克", "1磅 = 454克 = 1⅓杯"]
+                   }
+               },
+               
+               // 蛋白质类
+               butter: {
+                   name: { en: "Butter", zh: "黄油" },
+                   category: "protein",
+                   conversions: {
+                       en: ["1 cup = 227g = 8 oz", "1 tablespoon = 14g", "1 stick = 113g = ½ cup", "1 pound = 454g = 4 sticks"],
+                       zh: ["1杯 = 227克 = 8盎司", "1汤匙 = 14克", "1条 = 113克 = ½杯", "1磅 = 454克 = 4条"]
+                   }
+               },
+               eggs: {
+                   name: { en: "Eggs", zh: "鸡蛋" },
+                   category: "protein",
+                   conversions: {
+                       en: ["1 large egg = 50g = 3 tablespoons", "1 egg white = 30g = 2 tablespoons", "1 egg yolk = 20g = 1 tablespoon", "12 eggs = 1 pound"],
+                       zh: ["1个大鸡蛋 = 50克 = 3汤匙", "1个蛋白 = 30克 = 2汤匙", "1个蛋黄 = 20克 = 1汤匙", "12个鸡蛋 = 1磅"]
+                   }
+               },
+               almonds: {
+                   name: { en: "Almonds", zh: "杏仁" },
+                   category: "protein",
+                   conversions: {
+                       en: ["1 cup whole = 140g", "1 cup sliced = 85g", "1 cup ground = 100g", "1 pound = 454g = 3¼ cups whole"],
+                       zh: ["1杯整粒 = 140克", "1杯切片 = 85克", "1杯磨粉 = 100克", "1磅 = 454克 = 3¼杯整粒"]
+                   }
+               },
+               
+               // 调料类
+               rice: {
+                   name: { en: "Rice (uncooked)", zh: "大米（生米）" },
+                   category: "spice",
+                   conversions: {
+                       en: ["1 cup = 185g", "1 tablespoon = 12g", "1 pound = 454g = 2½ cups", "1 cup uncooked = 3 cups cooked"],
+                       zh: ["1杯 = 185克", "1汤匙 = 12克", "1磅 = 454克 = 2½杯", "1杯生米 = 3杯熟米"]
+                   }
+               },
+               salt: {
+                   name: { en: "Salt", zh: "盐" },
+                   category: "spice",
+                   conversions: {
+                       en: ["1 teaspoon = 6g", "1 tablespoon = 18g", "1 cup = 288g", "1 pound = 454g = 1⅔ cups"],
+                       zh: ["1茶匙 = 6克", "1汤匙 = 18克", "1杯 = 288克", "1磅 = 454克 = 1⅔杯"]
+                   }
+               },
+               vanilla: {
+                   name: { en: "Vanilla Extract", zh: "香草精" },
+                   category: "spice",
+                   conversions: {
+                       en: ["1 teaspoon = 5ml", "1 tablespoon = 15ml", "1 cup = 240ml", "1 bottle (2oz) = 60ml = 4 tablespoons"],
+                       zh: ["1茶匙 = 5毫升", "1汤匙 = 15毫升", "1杯 = 240毫升", "1瓶(2盎司) = 60毫升 = 4汤匙"]
+                   }
+               },
+               lemon: {
+                   name: { en: "Lemon", zh: "柠檬" },
+                   category: "spice",
+                   conversions: {
+                       en: ["1 medium lemon = 60ml juice = ¼ cup", "1 lemon zest = 1 tablespoon", "1 cup juice = 240ml = 4-6 lemons", "1 pound = 454g = 4-5 lemons"],
+                       zh: ["1个中等柠檬 = 60毫升汁 = ¼杯", "1个柠檬皮屑 = 1汤匙", "1杯柠檬汁 = 240毫升 = 4-6个柠檬", "1磅 = 454克 = 4-5个柠檬"]
+                   }
+               }
+           };
+   
+           // 历史记录管理
+           let conversionHistory = {
+               weight: [],
+               volume: [],
+               temp: []
+           };
+   
+           // 修复的语言切换功能
+           function switchLanguage(lang, buttonElement) {
+               currentLanguage = lang;
+               
+               // Update active language button
+               document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+               if (buttonElement) {
+                   buttonElement.classList.add('active');
+               }
+               
+               // Update all text elements
+               document.querySelectorAll('[data-lang-en]').forEach(element => {
+                   const enText = element.getAttribute('data-lang-en');
+                   const zhText = element.getAttribute('data-lang-zh');
+                   element.textContent = lang === 'en' ? enText : zhText;
+               });
+               
+               // Update placeholders
+               document.querySelectorAll('[data-placeholder-en]').forEach(element => {
+                   const enPlaceholder = element.getAttribute('data-placeholder-en');
+                   const zhPlaceholder = element.getAttribute('data-placeholder-zh');
+                   element.placeholder = lang === 'en' ? enPlaceholder : zhPlaceholder;
+               });
+               
+               // Update select options
+               document.querySelectorAll('option[data-lang-en]').forEach(option => {
+                   const enText = option.getAttribute('data-lang-en');
+                   const zhText = option.getAttribute('data-lang-zh');
+                   option.textContent = lang === 'en' ? enText : zhText;
+               });
+               
+               // Update page title
+               document.title = translations[lang].title;
+               
+               // 重新生成食材列表以更新语言
+               generateIngredientList();
+               
+               // 更新主题按钮文字
+               updateThemeButton();
+               
+               // 更新历史记录显示
+               updateAllHistoryDisplays();
+           }
+   
+           // 修复的标签切换
+           function showTab(tabName, buttonElement) {
+               // Hide all tab contents
+               const tabs = document.querySelectorAll('.tab-content');
+               tabs.forEach(tab => tab.style.display = 'none');
+               
+               // Remove active class from all tabs
+               const tabButtons = document.querySelectorAll('.tab');
+               tabButtons.forEach(tab => tab.classList.remove('active'));
+               
+               // Show selected tab
+               document.getElementById(tabName + '-converter').style.display = 'block';
+               if (buttonElement) {
+                   buttonElement.classList.add('active');
+               }
+           }
+   
+           // Weight conversion
+           function convertWeight() {
+               const input = parseFloat(document.getElementById('weightInput').value);
+               const fromUnit = document.getElementById('weightFrom').value;
+               const toUnit = document.getElementById('weightTo').value;
+               
+               if (isNaN(input)) {
+                   alert(translations[currentLanguage].alertInvalidNumber);
+                   return;
+               }
+               
+               // Convert to grams first, then to target unit
+               const grams = input * conversions.weight[fromUnit];
+               const result = grams / conversions.weight[toUnit];
+               
+               // 更新结果显示（支持复制）
+               const resultText = `${input} ${fromUnit} = ${result.toFixed(2)} ${toUnit}`;
+               document.getElementById('weightResultText').innerHTML = `<strong>${resultText}</strong>`;
+               document.getElementById('weightResult').style.display = 'flex';
+               
+               // 保存结果用于复制
+               window.lastWeightResult = resultText;
+               
+               // 添加到历史记录
+               addToHistory('weight', input, fromUnit, toUnit, result.toFixed(2));
+           }
+   
+           // Volume conversion
+           function convertVolume() {
+               const input = parseFloat(document.getElementById('volumeInput').value);
+               const fromUnit = document.getElementById('volumeFrom').value;
+               const toUnit = document.getElementById('volumeTo').value;
+               
+               if (isNaN(input)) {
+                   alert(translations[currentLanguage].alertInvalidNumber);
+                   return;
+               }
+               
+               // Convert to ml first, then to target unit
+               const ml = input * conversions.volume[fromUnit];
+               const result = ml / conversions.volume[toUnit];
+               
+               // 更新结果显示（支持复制）
+               const resultText = `${input} ${fromUnit} = ${result.toFixed(2)} ${toUnit}`;
+               document.getElementById('volumeResultText').innerHTML = `<strong>${resultText}</strong>`;
+               document.getElementById('volumeResult').style.display = 'flex';
+               
+               // 保存结果用于复制
+               window.lastVolumeResult = resultText;
+               
+               // 添加到历史记录
+               addToHistory('volume', input, fromUnit, toUnit, result.toFixed(2));
+           }
+   
+           // Temperature conversion
+           function convertTemperature() {
+               const input = parseFloat(document.getElementById('tempInput').value);
+               const fromUnit = document.getElementById('tempFrom').value;
+               const toUnit = document.getElementById('tempTo').value;
+               
+               if (isNaN(input)) {
+                   alert(translations[currentLanguage].alertInvalidNumber);
+                   return;
+               }
+               
+               let result;
+               if (fromUnit === 'c' && toUnit === 'f') {
+                   result = (input * 9/5) + 32;
+               } else if (fromUnit === 'f' && toUnit === 'c') {
+                   result = (input - 32) * 5/9;
+               } else {
+                   result = input;
+               }
+               
+               const units = { c: '°C', f: '°F' };
+               
+               // 更新结果显示（支持复制）
+               const resultText = `${input}${units[fromUnit]} = ${result.toFixed(1)}${units[toUnit]}`;
+               document.getElementById('tempResultText').innerHTML = `<strong>${resultText}</strong>`;
+               document.getElementById('tempResult').style.display = 'flex';
+               
+               // 保存结果用于复制
+               window.lastTempResult = resultText;
+               
+               // 添加到历史记录
+               addToHistory('temp', input, units[fromUnit], units[toUnit], result.toFixed(1));
+           }
+   
+           // 生成食材列表
+           function generateIngredientList() {
+               const container = document.getElementById('ingredientList');
+               if (!container) return;
+               
+               container.innerHTML = '';
+               
+               Object.keys(ingredients).forEach(key => {
+                   const ingredient = ingredients[key];
+                   const div = document.createElement('div');
+                   div.className = 'ingredient-item';
+                   div.setAttribute('data-category', ingredient.category);
+                   div.onclick = () => showIngredientInfo(key);
+                   
+                   const name = ingredient.name[currentLanguage];
+                   const mainConversion = ingredient.conversions[currentLanguage][0];
+                   
+                   div.innerHTML = `
+                       <strong>${name}</strong><br>
+                       <small>${mainConversion}</small>
+                   `;
+                   
+                   container.appendChild(div);
+               });
+           }
+   
+           // 修复的分类筛选功能
+           function filterByCategory(category, buttonElement) {
+               const items = document.querySelectorAll('.ingredient-item');
+               const buttons = document.querySelectorAll('.category-btn');
+               
+               // 更新按钮状态
+               buttons.forEach(btn => btn.classList.remove('active'));
+               if (buttonElement) {
+                   buttonElement.classList.add('active');
+               }
+               
+               // 显示/隐藏食材
+               items.forEach(item => {
+                   if (category === 'all' || item.getAttribute('data-category') === category) {
+                       item.classList.remove('hidden');
+                   } else {
+                       item.classList.add('hidden');
+                   }
+               });
+           }
+   
+           // 搜索功能
+           function filterIngredients() {
+               const searchTerm = document.getElementById('ingredientSearch').value.toLowerCase();
+               const items = document.querySelectorAll('.ingredient-item');
+               
+               items.forEach(item => {
+                   const text = item.textContent.toLowerCase();
+                   if (text.includes(searchTerm)) {
+                       item.classList.remove('hidden');
+                   } else {
+                       item.classList.add('hidden');
+                   }
+               });
+           }
+   
+           // Show ingredient information
+           function showIngredientInfo(ingredientKey) {
+               const ingredient = ingredients[ingredientKey];
+               const name = ingredient.name[currentLanguage];
+               const conversions = ingredient.conversions[currentLanguage];
+               
+               let html = `<h4>${name} - ${translations[currentLanguage].commonConversions}</h4><ul>`;
+               
+               conversions.forEach(conversion => {
+                   html += `<li>${conversion}</li>`;
+               });
+               
+               html += '</ul>';
+               
+               document.getElementById('ingredientResult').innerHTML = html;
+               document.getElementById('ingredientResult').style.display = 'block';
+           }
+   
+           // Calculate portions
+           function calculatePortions() {
+               const original = parseFloat(document.getElementById('originalPortions').value);
+               const newAmount = parseFloat(document.getElementById('newPortions').value);
+               
+               if (isNaN(original) || isNaN(newAmount) || original <= 0 || newAmount <= 0) {
+                   alert(translations[currentLanguage].alertInvalidPortions);
+                   return;
+               }
+               
+               const multiplier = newAmount / original;
+               
+               let html = `<strong>${translations[currentLanguage].recipeFactor} ${multiplier.toFixed(2)}</strong><br><br>`;
+               html += `${translations[currentLanguage].multiplyIngredients} <strong>${multiplier.toFixed(2)}</strong><br><br>`;
+               html += `<div class="portion-example">`;
+               html += `${translations[currentLanguage].examples}<br>`;
+               
+               if (currentLanguage === 'en') {
+                   html += `• 1 cup flour → ${(1 * multiplier).toFixed(2)} cups flour<br>`;
+                   html += `• 2 tablespoons oil → ${(2 * multiplier).toFixed(2)} tablespoons oil<br>`;
+                   html += `• 500g meat → ${(500 * multiplier).toFixed(0)}g meat`;
+               } else {
+                   html += `• 1杯面粉 → ${(1 * multiplier).toFixed(2)}杯面粉<br>`;
+                   html += `• 2汤匙油 → ${(2 * multiplier).toFixed(2)}汤匙油<br>`;
+                   html += `• 500克肉 → ${(500 * multiplier).toFixed(0)}克肉`;
+               }
+               html += `</div>`;
+               
+               document.getElementById('portionResult').innerHTML = html;
+               document.getElementById('portionResult').style.display = 'block';
+           }
+   
+           // 历史记录功能
+           function loadHistory() {
+               const saved = localStorage.getItem('kitchenConverterHistory');
+               if (saved) {
+                   try {
+                       conversionHistory = JSON.parse(saved);
+                       updateAllHistoryDisplays();
+                   } catch (e) {
+                       console.error('Failed to load history:', e);
+                       conversionHistory = { weight: [], volume: [], temp: [] };
+                   }
+               }
+           }
+   
+           function saveHistory() {
+               try {
+                   localStorage.setItem('kitchenConverterHistory', JSON.stringify(conversionHistory));
+               } catch (e) {
+                   console.error('Failed to save history:', e);
+               }
+           }
+   
+           function addToHistory(type, inputValue, fromUnit, toUnit, resultValue) {
+               const record = {
+                   input: `${inputValue} ${fromUnit}`,
+                   result: `${resultValue} ${toUnit}`,
+                   timestamp: new Date().toLocaleTimeString(),
+                   fullText: `${inputValue} ${fromUnit} = ${resultValue} ${toUnit}`
+               };
+               
+               // 添加到数组开头，限制最多10条记录
+               conversionHistory[type].unshift(record);
+               if (conversionHistory[type].length > 10) {
+                   conversionHistory[type].pop();
+               }
+               
+               saveHistory();
+               updateHistoryDisplay(type);
+           }
+   
+           function updateHistoryDisplay(type) {
+               const historyList = document.getElementById(type + 'HistoryList');
+               const historySection = document.getElementById(type + 'History');
+               
+               if (!historyList || !historySection) return;
+               
+               if (conversionHistory[type].length === 0) {
+                   historyList.innerHTML = `<div class="no-history">${currentLanguage === 'en' ? 'No recent conversions' : '暂无转换记录'}</div>`;
+                   historySection.style.display = 'none';
+                   return;
+               }
+               
+               historySection.style.display = 'block';
+               historyList.innerHTML = '';
+               
+               conversionHistory[type].forEach((record, index) => {
+                   const item = document.createElement('div');
+                   item.className = 'history-item';
+                   item.onclick = () => reuseConversion(type, record);
+                   
+                   // 安全创建复制按钮
+                   const copyBtnContainer = document.createElement('div');
+                   copyBtnContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+                   
+                   const timestamp = document.createElement('span');
+                   timestamp.className = 'timestamp';
+                   timestamp.textContent = record.timestamp;
+                   
+                   const copyBtn = document.createElement('button');
+                   copyBtn.className = 'copy-btn';
+                   copyBtn.textContent = '📋';
+                   copyBtn.onclick = (e) => {
+                       e.stopPropagation();
+                       copyHistoryItem(record.fullText);
+                   };
+                   
+                   copyBtnContainer.appendChild(timestamp);
+                   copyBtnContainer.appendChild(copyBtn);
+                   
+                   const conversionText = document.createElement('span');
+                   conversionText.className = 'conversion-text';
+                   conversionText.textContent = record.fullText;
+                   
+                   item.appendChild(conversionText);
+                   item.appendChild(copyBtnContainer);
+                   
+                   historyList.appendChild(item);
+               });
+           }
+   
+           function updateAllHistoryDisplays() {
+               updateHistoryDisplay('weight');
+               updateHistoryDisplay('volume');
+               updateHistoryDisplay('temp');
+           }
+   
+           function reuseConversion(type, record) {
+               const parts = record.input.split(' ');
+               const inputValue = parts[0];
+               const fromUnit = parts.slice(1).join(' ');
+               
+               if (type === 'weight') {
+                   document.getElementById('weightInput').value = inputValue;
+                   // 尝试设置单位，如果不存在则使用默认
+                   const fromSelect = document.getElementById('weightFrom');
+                   if ([...fromSelect.options].some(option => option.value === fromUnit)) {
+                       fromSelect.value = fromUnit;
+                   }
+                   convertWeight();
+               } else if (type === 'volume') {
+                   document.getElementById('volumeInput').value = inputValue;
+                   const fromSelect = document.getElementById('volumeFrom');
+                   if ([...fromSelect.options].some(option => option.value === fromUnit)) {
+                       fromSelect.value = fromUnit;
+                   }
+                   convertVolume();
+               } else if (type === 'temp') {
+                   document.getElementById('tempInput').value = inputValue;
+                   const fromSelect = document.getElementById('tempFrom');
+                   if ([...fromSelect.options].some(option => option.value === fromUnit.replace('°', ''))) {
+                       fromSelect.value = fromUnit.replace('°', '');
+                   }
+                   convertTemperature();
+               }
+           }
+   
+           function clearHistory(type) {
+               conversionHistory[type] = [];
+               saveHistory();
+               updateHistoryDisplay(type);
+           }
+   
+           // 主题管理
+           function loadTheme() {
+               const savedTheme = localStorage.getItem('kitchenConverterTheme');
+               if (savedTheme === 'dark') {
+                   isDarkTheme = true;
+                   document.body.classList.add('dark-theme');
+                   updateThemeButton();
+               }
+           }
+   
+           function saveTheme() {
+               try {
+                   localStorage.setItem('kitchenConverterTheme', isDarkTheme ? 'dark' : 'light');
+               } catch (e) {
+                   console.error('Failed to save theme:', e);
+               }
+           }
+   
+           function toggleTheme() {
+               isDarkTheme = !isDarkTheme;
+               
+               if (isDarkTheme) {
+                   document.body.classList.add('dark-theme');
+               } else {
+                   document.body.classList.remove('dark-theme');
+               }
+               
+               updateThemeButton();
+               saveTheme();
+           }
+   
+           function updateThemeButton() {
+               const themeBtn = document.getElementById('themeBtn');
+               if (themeBtn) {
+                   if (isDarkTheme) {
+                       themeBtn.textContent = '☀️';
+                       themeBtn.title = translations[currentLanguage].switchToLight;
+                   } else {
+                       themeBtn.textContent = '🌙';
+                       themeBtn.title = translations[currentLanguage].switchToDark;
+                   }
+               }
+           }
+   
+           // 复制功能
+           function copyResult(type) {
+               let textToCopy = '';
+               
+               switch(type) {
+                   case 'weight':
+                       textToCopy = window.lastWeightResult || '';
+                       break;
+                   case 'volume':
+                       textToCopy = window.lastVolumeResult || '';
+                       break;
+                   case 'temp':
+                       textToCopy = window.lastTempResult || '';
+                       break;
+                   default:
+                       return;
+               }
+               
+               if (!textToCopy) return;
+               
+               copyToClipboard(textToCopy);
+           }
+   
+           function copyHistoryItem(text) {
+               copyToClipboard(text);
+           }
+   
+           function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            showCopyToast();
+        }).catch(() => {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            textArea.style.top = '-9999px';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopyToast();
+            } catch (err) {
+                console.error('复制失败:', err);
+                alert(currentLanguage === 'en' ? 'Copy failed' : '复制失败');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyToast() {
+            const toast = document.getElementById('copyToast');
+            if (!toast) return;
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize - 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                showTab('basic', document.querySelector('.tab.active'));
+                generateIngredientList();
+                loadHistory();
+                loadTheme();
+            } catch (e) {
+                console.error('Initialization error:', e);
+            }
+        });
+
+        // 错误处理：防止未定义的函数调用
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('JavaScript Error:', msg, 'at line:', lineNo);
+            return false;
+        };
+    </script>
+</body>
+</html>
+
+   
+                
+                
