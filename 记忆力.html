@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>专注与记忆力速训 | Focus & Memory Sprint</title>
+  <style>
+    :root{
+      --bg:#0f1226;--panel:#171a33;--card:#1f2347;--accent:#7c9fff;--accent-2:#27d3a2;--danger:#ff6b6b;--ok:#78e08f;--text:#e9ecff;--muted:#b7c1ff;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji"; background: radial-gradient(1200px 800px at 80% -5%, #1a1f47 0%, #0f1226 60%); color:var(--text)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter: blur(6px);position:sticky;top:0;z-index:10}
+    header h1{font-size:18px;margin:0;letter-spacing:.5px}
+    header .controls{display:flex;gap:8px;align-items:center}
+    button, select{background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:14px;cursor:pointer;box-shadow:var(--shadow);transition:.2s transform,.2s background,.2s border}
+    button:hover, select:hover{transform:translateY(-1px);border-color: rgba(255,255,255,.2)}
+    button.primary{background:linear-gradient(135deg,var(--accent),#5e8bff);border:none;color:#0b0e22;font-weight:700}
+    button.ghost{background:transparent;border:1px dashed rgba(255,255,255,.18)}
+    button.toggle.on{outline:2px solid var(--accent-2)}
+
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns: 330px 1fr;gap:16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+
+    .pane-title{font-weight:700;color:var(--muted);text-transform:uppercase;font-size:12px;letter-spacing:.12em;margin:4px 0 10px}
+    .game-select{display:grid;gap:10px}
+    .game-btn{display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:var(--card);border:1px solid rgba(255,255,255,.07);cursor:pointer}
+    .game-btn.active{outline:2px solid var(--accent);}
+    .game-btn small{color:var(--muted)}
+
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .stat{background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:10px;text-align:center}
+    .stat b{display:block;font-size:20px}
+    .hint{color:var(--muted);font-size:13px}
+
+    .stage{min-height:540px;display:grid;grid-template-rows: auto 1fr;gap:12px}
+    .hud{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px 12px}
+    .hud .left, .hud .right{display:flex;gap:10px;align-items:center}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--card);border:1px solid rgba(255,255,255,.08);font-size:13px}
+    .pill.bad{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.3)}
+    .pill.good{background:rgba(39,211,162,.1);border-color:rgba(39,211,162,.4)}
+
+    #viewport{display:grid;place-items:center;background:radial-gradient(800px 400px at 20% -20%, #232858 0%, #171a33 60%);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px}
+    .panel-inner{width:100%;height:100%;display:grid;place-items:center}
+
+    /* Memory Grid */
+    .grid{display:grid;gap:8px}
+    .cell{width:54px;height:54px;border-radius:12px;background:#12142b;border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;font-weight:700}
+    .cell.on{background:linear-gradient(135deg,var(--accent-2),#45f0c5);color:#0b0e22}
+    .cell.pick{outline:3px solid #45f0c5}
+
+    /* Stroop */
+    .stroop-word{font-size:54px;font-weight:900;letter-spacing:.04em}
+    .stroop-keys{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+
+    /* Stream (N-back Lite) */
+    .stream{display:flex;flex-direction:column;align-items:center;gap:16px}
+    .letter{font-size:76px;font-weight:900}
+    .pos9{display:grid;gap:8px;grid-template-columns:repeat(3,68px)}
+    .pos9 div{width:68px;height:68px;border-radius:16px;background:#12142b;border:1px solid rgba(255,255,255,.06)}
+    .pos9 .hit{background:linear-gradient(135deg,var(--accent),#5e8bff)}
+
+    .kbd{padding:2px 6px;border:1px solid rgba(255,255,255,.25);border-radius:6px;background:rgba(255,255,255,.06)}
+
+    @media (max-width: 960px){
+      .wrap{grid-template-columns:1fr}
+      .stage{min-height:420px}
+      .cell{width:44px;height:44px}
+      .pos9{grid-template-columns:repeat(3,56px)}
+      .pos9 div{width:56px;height:56px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚡ 专注与记忆力速训 <span style="color:var(--accent)">Sprint</span></h1>
+    <div class="controls">
+      <select id="sessionLen">
+        <option value="180">快速 3 分钟</option>
+        <option value="300" selected>标准 5 分钟</option>
+        <option value="600">强化 10 分钟</option>
+      </select>
+      <button id="btnStart" class="primary">开始 (S)</button>
+      <button id="btnPause" class="ghost">暂停/继续 (P)</button>
+      <button id="btnSound" class="toggle">音效</button>
+      <button id="btnReset" class="ghost">重置</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <aside class="card">
+      <div class="pane-title">模式选择</div>
+      <div class="game-select" id="gameSelect">
+        <div class="game-btn active" data-game="grid">
+          <div>🧩 <b>记忆方格</b></div>
+          <small>看→记→点，逐步扩展</small>
+        </div>
+        <div class="game-btn" data-game="stroop">
+          <div>🎯 <b>专注斯特鲁普</b></div>
+          <small>看颜色，不看文字</small>
+        </div>
+        <div class="game-btn" data-game="stream">
+          <div>📡 <b>N-Back 精简</b></div>
+          <small>位置/字母匹配</small>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="pane-title">训练数据</div>
+      <div class="stats">
+        <div class="stat"><small>得分</small><b id="statScore">0</b></div>
+        <div class="stat"><small>等级</small><b id="statLevel">1</b></div>
+        <div class="stat"><small>准确</small><b id="statAcc">—</b></div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="pane-title">历史最佳（本机）</div>
+      <div class="stats">
+        <div class="stat"><small>最高分</small><b id="bestScore">0</b></div>
+        <div class="stat"><small>最长连击</small><b id="bestStreak">0</b></div>
+        <div class="stat"><small>完成组数</small><b id="bestSets">0</b></div>
+      </div>
+
+      <div style="height:12px"></div>
+      <p class="hint">快捷键：<span class="kbd">S</span> 开始，<span class="kbd">P</span> 暂停，<span class="kbd">R</span> 重置。
+        模式中还有专用键位，见上方提示。</p>
+    </aside>
+
+    <main class="card stage">
+      <div class="hud">
+        <div class="left">
+          <div class="pill">⏱️ <span id="timeLeft">00:00</span></div>
+          <div class="pill">🎮 <span id="modeLabel">记忆方格</span></div>
+          <div class="pill">⚡ 连击 <span id="streak">0</span></div>
+        </div>
+        <div class="right">
+          <div class="pill good" id="feedbackGood" style="display:none">✅ 正确 +</div>
+          <div class="pill bad" id="feedbackBad" style="display:none">❌ 失误</div>
+        </div>
+      </div>
+      <div id="viewport">
+        <div class="panel-inner" id="panel">
+          <!-- Dynamic content goes here -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <template id="tplGrid">
+    <div style="display:grid;gap:14px;place-items:center">
+      <div id="gridInfo" class="hint">观察高亮格子，记住位置，然后复现。点击顺序不限。</div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </template>
+
+  <template id="tplStroop">
+    <div style="display:grid;gap:18px;place-items:center;text-align:center">
+      <div class="hint">按字体"颜色"对应键位：<b>R/G/B/Y/M/C</b>（红/绿/蓝/黄/洋红/青）。</div>
+      <div class="stroop-word" id="stroopWord">RED</div>
+      <div class="stroop-keys">
+        <div class="pill">键位：R G B Y M C</div>
+        <div class="pill">错 three 次将降速</div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tplStream">
+    <div class="stream">
+      <div class="hint">若当前与 <b>N</b> 步前字母/位置一致，按 <span class="kbd">J</span>（字母）或 <span class="kbd">K</span>（位置）。精准会自动提升 N。</div>
+      <div class="letter" id="streamLetter">A</div>
+      <div class="pos9" id="pos9"></div>
+      <div class="hint">当前 N = <b id="nBack">1</b> ｜ 节奏 <b id="pace">900ms</b></div>
+    </div>
+  </template>
+
+  <script>
+  // ===== Utilities =====
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const pad = n => String(n).padStart(2,'0');
+  const beep = (type=440, dur=0.06, vol=.05)=>{ if(!state.sound) return; const ctx = new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.frequency.value=type; o.type='sine'; g.gain.value=vol; o.connect(g); g.connect(ctx.destination); o.start(); setTimeout(()=>{o.stop();ctx.close();}, dur*1000); };
+
+  const persist = {
+    get(){ try{ return JSON.parse(localStorage.getItem('fm-sprint-best')||'{}'); }catch(e){return {}} },
+    set(obj){ localStorage.setItem('fm-sprint-best', JSON.stringify(obj)); }
+  }
+
+  function updateBests(){
+    const best = persist.get();
+    $('#bestScore').textContent = best.score||0;
+    $('#bestStreak').textContent = best.streak||0;
+    $('#bestSets').textContent = best.sets||0;
+  }
+
+  function setBest(key,val){
+    const best = persist.get();
+    best[key] = Math.max(val, best[key]||0);
+    persist.set(best); updateBests();
+  }
+
+  function flash(el){ el.style.display='block'; setTimeout(()=>el.style.display='none', 400); }
+
+  // ===== Global State =====
+  const state = {
+    running:false, paused:false, sound:false,
+    game:'grid', level:1, score:0, streak:0,
+    correct:0, total:0,
+    session: 300, // seconds
+    tickHandle:null,
+
+    // Game specific
+    grid:{size:3, pattern:[], picks:[], setCount:0},
+    stroop:{speed:1100, miss:0},
+    stream:{n:1, pace:900, history:[], posHistory:[], lock:false}
+  };
+
+  // ===== UI Wiring =====
+  function setMode(mode){
+    state.game = mode; $$('#gameSelect .game-btn').forEach(b=>b.classList.toggle('active', b.dataset.game===mode));
+    $('#modeLabel').textContent = mode==='grid'?'记忆方格':(mode==='stroop'?'专注斯特鲁普':'N-Back 精简');
+    renderPanel();
+  }
+
+  $$('#gameSelect .game-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    setMode(btn.dataset.game);
+  }));
+
+  $('#btnStart').addEventListener('click', startSession);
+  $('#btnPause').addEventListener('click', ()=>{ if(!state.running) return; state.paused=!state.paused; $('#btnPause').textContent = state.paused?'继续 (P)':'暂停/继续 (P)'; });
+  $('#btnSound').addEventListener('click', ()=>{ state.sound=!state.sound; $('#btnSound').classList.toggle('on', state.sound); });
+  $('#btnReset').addEventListener('click', resetAll);
+  $('#sessionLen').addEventListener('change', e=>{ state.session = parseInt(e.target.value,10); updateTime(state.session); });
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.key==='s' || e.key==='S'){ startSession(); }
+    if(e.key==='p' || e.key==='P'){ if(!state.running) return; state.paused=!state.paused; $('#btnPause').textContent = state.paused?'继续 (P)':'暂停/继续 (P)'; }
+    if(e.key==='r' || e.key==='R'){ resetAll(); }
+
+    // Per-game keys
+    if(state.game==='stroop') handleStroopKey(e.key);
+    if(state.game==='stream') handleStreamKey(e.key);
+  });
+
+  function resetAll(){
+    state.running=false; state.paused=false; state.level=1; state.score=0; state.streak=0; state.correct=0; state.total=0;
+    state.grid={size:3, pattern:[], picks:[], setCount:0};
+    state.stroop={speed:1100, miss:0};
+    state.stream={n:1, pace:900, history:[], posHistory:[], lock:false};
+    $('#btnPause').textContent='暂停/继续 (P)';
+    updateHUD(); renderPanel(); updateTime(parseInt($('#sessionLen').value,10));
+  }
+
+  function startSession(){
+    if(state.running){ return; }
+    state.running=true; state.paused=false; updateTime(state.session = parseInt($('#sessionLen').value,10));
+    tick();
+    // Kick off current game
+    if(state.game==='grid') newGridSet();
+    if(state.game==='stroop') nextStroop();
+    if(state.game==='stream') nextStreamTick();
+  }
+
+  function updateHUD(){
+    $('#statScore').textContent = state.score;
+    $('#statLevel').textContent = state.level;
+    const acc = state.total? Math.round(100*state.correct/state.total)+'%':'—';
+    $('#statAcc').textContent = acc;
+    $('#streak').textContent = state.streak;
+  }
+
+  function updateTime(sec){ $('#timeLeft').textContent = `${pad(Math.floor(sec/60))}:${pad(sec%60)}`; }
+
+  function endSession(){
+    state.running=false; clearTimeout(state.tickHandle); state.tickHandle=null;
+    setBest('score', state.score); setBest('streak', state.streak); setBest('sets', state.grid.setCount||0);
+    const msg = `训练结束！得分 ${state.score}，准确率 ${(state.total? Math.round(100*state.correct/state.total):0)}%`;
+    $('#panel').innerHTML = `<div style="text-align:center;display:grid;gap:14px;place-items:center"><h2>${msg}</h2><div class="hint">再次按 <span class='kbd'>S</span> 重新开始，或更换模式。</div></div>`;
+  }
+
+  function tick(){
+    if(!state.running) return; if(state.paused){ state.tickHandle=setTimeout(tick, 250); return; }
+    if(state.session<=0){ endSession(); return; }
+    state.session--; updateTime(state.session);
+    state.tickHandle=setTimeout(tick, 1000);
+  }
+
+  function renderPanel(){
+    const panel = $('#panel');
+    if(state.game==='grid') panel.replaceChildren(document.importNode($('#tplGrid').content,true));
+    if(state.game==='stroop') panel.replaceChildren(document.importNode($('#tplStroop').content,true));
+    if(state.game==='stream') panel.replaceChildren(document.importNode($('#tplStream').content,true));
+    if(state.game==='stream'){ const pos9=$('#pos9'); pos9.replaceChildren(...Array.from({length:9},()=>{const d=document.createElement('div'); return d;})); }
+  }
+
+  // ===== Game 1: Memory Grid =====
+  function newGridSet(){
+    const base=3; const add = Math.floor((state.level-1)/2); state.grid.size = Math.min(6, base+add); // 3..6
+    const grid = $('#grid');
+    const n = state.grid.size; grid.style.gridTemplateColumns = `repeat(${n}, 54px)`;
+    grid.innerHTML='';
+    const total = n*n; const take = Math.min(Math.max(3, Math.floor(n+state.level/2)), Math.min(10, total-1));
+    const pattern = pickUnique(total, take); state.grid.pattern = pattern; state.grid.picks=[]; state.grid.setCount++;
+    const nodes = [];
+    for(let i=0;i<total;i++){ const c=document.createElement('div'); c.className='cell'; c.dataset.idx=i; c.addEventListener('click', onGridPick); nodes.push(c); }
+    nodes.forEach(n=>grid.appendChild(n));
+
+    // Flash pattern
+    (async()=>{
+      $('#gridInfo').textContent = '观察中…';
+      for(const idx of pattern){ nodes[idx].classList.add('on'); beep(660, .05, .04); await wait(350); nodes[idx].classList.remove('on'); await wait(110); }
+      $('#gridInfo').textContent = '请复现刚才的高亮格（顺序不限）';
+      nodes.forEach(n=>n.classList.add('pick'));
+    })();
+  }
+
+  function onGridPick(e){ if(!state.running||state.paused) return; const idx=parseInt(e.currentTarget.dataset.idx,10);
+    if(state.grid.picks.includes(idx)) return; state.grid.picks.push(idx);
+    const ok = state.grid.pattern.includes(idx); state.total++; if(ok){ state.correct++; state.score+=5; state.streak++; e.currentTarget.classList.add('on'); beep(800,.05,.06); flash($('#feedbackGood')); }else{ state.score=Math.max(0,state.score-3); state.streak=0; e.currentTarget.style.background= 'rgba(255,107,107,.18)'; flash($('#feedbackBad')); beep(220,.08,.07); }
+    updateHUD();
+    if(state.grid.picks.length>=state.grid.pattern.length){
+      // Evaluate
+      const miss = diffCount(state.grid.pattern, state.grid.picks);
+      if(miss===0){ state.level++; state.score+=10; state.streak+=2; }
+      else { state.level = Math.max(1, state.level + (ok?0:-1)); }
+      updateHUD();
+      setTimeout(newGridSet, 600);
+    }
+  }
+
+  function diffCount(target, picks){
+    let miss=0; for(const t of target){ if(!picks.includes(t)) miss++; } return miss;
+  }
+
+  function pickUnique(max, k){ const arr=[...Array(max).keys()]; for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr.slice(0,k).sort((a,b)=>a-b); }
+  const wait = ms => new Promise(r=>setTimeout(r,ms));
+
+  // ===== Game 2: Stroop =====
+  const COLORS = [
+    {name:'RED', key:'r', css:'#ef476f'},
+    {name:'GREEN', key:'g', css:'#06d6a0'},
+    {name:'BLUE', key:'b', css:'#118ab2'},
+    {name:'YELLOW', key:'y', css:'#ffd166'},
+    {name:'MAGENTA', key:'m', css:'#ff00a6'},
+    {name:'CYAN', key:'c', css:'#00d9ff'}
+  ];
+  function nextStroop(){ if(!state.running) return; if(state.game!=='stroop') return;
+    if(state.paused){ setTimeout(nextStroop, 100); return; }
+    // choose font color and word independently
+    const color = COLORS[Math.floor(Math.random()*COLORS.length)];
+    const word = COLORS[Math.floor(Math.random()*COLORS.length)];
+    const el=$('#stroopWord'); el.textContent = word.name; el.style.color = color.css;
+    el.dataset.expect = color.key;
+    setTimeout(nextStroop, Math.max(500, state.stroop.speed));
+  }
+  function handleStroopKey(key){ if(!state.running||state.game!=='stroop'||state.paused) return;
+    const exp = ($('#stroopWord').dataset.expect||'').toLowerCase(); if(!exp) return;
+    state.total++;
+    if(key.toLowerCase()===exp){ state.correct++; state.score+=2; state.streak++; state.stroop.miss=0; flash($('#feedbackGood')); beep(880,.05,.05); state.stroop.speed = Math.max(550, state.stroop.speed-20); }
+    else { state.score=Math.max(0,state.score-2); state.streak=0; state.stroop.miss++; flash($('#feedbackBad')); beep(180,.06,.06); if(state.stroop.miss>=3) state.stroop.speed = Math.min(1400, state.stroop.speed+60); }
+    $('#pace').textContent = state.stroop.speed+"ms"; updateHUD();
+  }
+
+  // ===== Game 3: Stream N-back (lite) =====
+  function nextStreamTick(){ if(!state.running) return; if(state.game!=='stream') return;
+    if(state.paused){ setTimeout(nextStreamTick, 80); return; }
+    // Generate next letter and position
+    const letter = String.fromCharCode(65 + Math.floor(Math.random()*8));
+    const pos = Math.floor(Math.random()*9);
+    const letterEl=$('#streamLetter'); letterEl.textContent=letter;
+    const cells = Array.from($('#pos9').children);
+    cells.forEach(c=>c.className=''); cells[pos].classList.add('hit');
+
+    state.stream.history.push(letter); if(state.stream.history.length>20) state.stream.history.shift();
+    state.stream.posHistory.push(pos); if(state.stream.posHistory.length>20) state.stream.posHistory.shift();
+
+    state.stream.lock=false; // unlock answers for this frame
+
+    setTimeout(nextStreamTick, Math.max(550, state.stream.pace));
+  }
+
+  function handleStreamKey(key){ if(!state.running||state.game!=='stream'||state.paused||state.stream.lock) return;
+    const k = key.toLowerCase(); if(!['j','k'].includes(k)) return;
+    const n=state.stream.n; const h=state.stream.history; const p=state.stream.posHistory;
+    const idx = h.length-1; if(idx-n<0) return; // not enough backlog
+
+    let isMatch=false; if(k==='j'){ isMatch = h[idx]===h[idx-n]; } else { isMatch = p[idx]===p[idx-n]; }
+
+    state.total++; if(isMatch){ state.correct++; state.score+=3; state.streak++; beep(900,.05,.05); flash($('#feedbackGood')); } else { state.score=Math.max(0,state.score-3); state.streak=0; beep(160,.06,.06); flash($('#feedbackBad')); }
+    updateHUD(); state.stream.lock=true; // one answer per frame
+
+    // Auto adjust N & pace by rolling accuracy
+    const recent = Math.max(12, n*6); // window size
+    const acc = rollingAcc(recent);
+    if(acc>=0.83 && state.stream.pace>=650){ state.stream.n = Math.min(4, state.stream.n+1); state.stream.pace = Math.max(650, state.stream.pace-50); }
+    if(acc<=0.55){ state.stream.n = Math.max(1, state.stream.n-1); state.stream.pace = Math.min(1200, state.stream.pace+60); }
+    $('#nBack').textContent = state.stream.n; $('#pace').textContent = state.stream.pace+"ms";
+  }
+
+  function rollingAcc(windowSize){
+    const tot = state.total; if(!tot) return 0; const start = Math.max(0, tot-windowSize);
+    // we don't store per-trial results; estimate using global accuracy drift toward recent by simple smoothing
+    const global = state.correct/state.total; const weight = Math.min(1, windowSize/Math.max(1,tot));
+    return global*weight + global*(1-weight); // fallback: global
+  }
+
+  // ===== Init =====
+  function boot(){
+    updateTime(parseInt($('#sessionLen').value,10));
+    updateBests();
+    renderPanel();
+  }
+  boot();
+  </script>
+</body>
+</html>
